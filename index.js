@@ -16,9 +16,42 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        // const tasksCollection = client.db("toDoList").collection("tasks");
-
+        const studentCollection = client.db("toDoList").collection("studentDetails");
         console.log('db connected');
+
+        //add data on database
+        app.post('/student', async (req, res) => {
+            const newStudent = req.body;
+            const result = await studentCollection.insertOne(newStudent);
+            res.send(result)
+        });
+
+        //get all data from database...
+        app.get('/student', async (req, res) => {
+            const allStudents = await studentCollection.find({}).toArray();
+            res.send(allStudents);
+        });
+
+        //update  by id 
+        app.put('/student/:id', async (req, res) => {
+            const id = req.params.id;
+            const studentInfo = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: studentInfo
+            }
+            const updatedOrders = await studentCollection.updateOne(filter, updateDoc);
+            res.send(updatedOrders);
+        });
+
+        //Delete  by id api 
+        app.delete('/student/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            result = await studentCollection.deleteOne(query);
+            res.send(result)
+        });
+
     }
     finally {
 
@@ -29,7 +62,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('to do app  Server is running')
+    res.send('Softnerve Technology Private Limited  Server is running')
 });
 
 app.listen(port, () => {
